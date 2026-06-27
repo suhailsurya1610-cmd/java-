@@ -1,0 +1,246 @@
+import java.util.Scanner;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
+public class RtoFancyNumberChecker {
+
+    public static void main(String[] args) {
+        if (args.length > 0 && args[0].equalsIgnoreCase("--test")) {
+            runTests();
+            return;
+        }
+
+        Scanner scanner = new Scanner(System.in);
+        System.out.println("==================================================");
+        System.out.println("          RTO Fancy Number Checker v1.0           ");
+        System.out.println("==================================================");
+        System.out.println("Type 'exit' to quit the program.\n");
+
+        while (true) {
+            System.out.print("Enter vehicle registration number or 4-digit number: ");
+            String input = scanner.nextLine().trim();
+
+            if (input.equalsIgnoreCase("exit")) {
+                System.out.println("Exiting. Thank you!");
+                break;
+            }
+
+            if (input.isEmpty()) {
+                continue;
+            }
+
+            // Extract the last sequence of digits
+            String lastDigits = extractLastDigits(input);
+
+            if (lastDigits.isEmpty()) {
+                System.out.println("Invalid registration number. No digits found.\n");
+                continue;
+            }
+
+            // Format to exactly 4 digits by padding with leading zeros or taking the last 4 digits
+            String formattedDigits;
+            if (lastDigits.length() > 4) {
+                formattedDigits = lastDigits.substring(lastDigits.length() - 4);
+                System.out.println("Note: Extracted last 4 digits: " + formattedDigits);
+            } else {
+                formattedDigits = String.format("%04d", Integer.parseInt(lastDigits));
+            }
+
+            // Check if it is a fancy number
+            FancyResult result = checkFancy(formattedDigits);
+
+            if (result.isFancy) {
+                System.out.println("Result: YES");
+                System.out.println("Reason: " + result.reason + "\n");
+            } else {
+                System.out.println("Result: NO\n");
+            }
+        }
+        scanner.close();
+    }
+
+    /**
+     * Extracts the last block of digits in the registration number string.
+     */
+    private static String extractLastDigits(String input) {
+        Pattern pattern = Pattern.compile("\\d+");
+        Matcher matcher = pattern.matcher(input);
+        String lastDigits = "";
+        while (matcher.find()) {
+            lastDigits = matcher.group();
+        }
+        return lastDigits;
+    }
+
+    /**
+     * Standard rule checker for RTO fancy numbers.
+     */
+    public static FancyResult checkFancy(String s) {
+        int val = Integer.parseInt(s);
+
+        // 1. Single Digit / Double Digit (under 100)
+        // Values like 0001 to 0099
+        if (val > 0 && val < 100) {
+            if (val < 10) {
+                return new FancyResult(true, "Single Digit number (000" + val + ")");
+            } else {
+                return new FancyResult(true, "Double Digit number (00" + val + ")");
+            }
+        }
+
+        // 2. All Identical Digits (Repeating)
+        // e.g., 1111, 2222, ..., 9999
+        if (s.charAt(0) == s.charAt(1) && s.charAt(1) == s.charAt(2) && s.charAt(2) == s.charAt(3)) {
+            return new FancyResult(true, "All Identical Digits (" + s + ")");
+        }
+
+        // 3. Multiples of Thousands
+        // e.g., 1000, 2000, ..., 9000
+        if (val % 1000 == 0) {
+            return new FancyResult(true, "Multiple of Thousands (" + s + ")");
+        }
+
+        // 4. Multiples of Hundreds
+        // e.g., 0100, 0200, ..., 0900 (already covered: 1000 etc. but lets check others like 1100, 1200, etc. if desired,
+        // but typically pure hundreds like 0100, 0200 or ends in 00 is attractive)
+        if (s.endsWith("00")) {
+            return new FancyResult(true, "Multiple of Hundreds (" + s + ")");
+        }
+
+        // 5. Symmetric / Palindromic (ABBA)
+        // e.g., 1221, 5005, 9009
+        if (s.charAt(0) == s.charAt(3) && s.charAt(1) == s.charAt(2)) {
+            return new FancyResult(true, "Symmetric/Palindrome (" + s + ")");
+        }
+
+        // 6. Repetitive Pairs (ABAB)
+        // e.g., 1212, 1515, 5050
+        if (s.substring(0, 2).equals(s.substring(2, 4))) {
+            return new FancyResult(true, "Repetitive Pairs ABAB (" + s + ")");
+        }
+
+        // 7. Pairs AABB (e.g. 1122, 5566, 0055)
+        if (s.charAt(0) == s.charAt(1) && s.charAt(2) == s.charAt(3)) {
+            return new FancyResult(true, "Pair Pattern AABB (" + s + ")");
+        }
+
+        // 8. Consecutive/Sequential Digits (Ascending or Descending)
+        if (isAscending(s)) {
+            return new FancyResult(true, "Ascending Sequential Digits (" + s + ")");
+        }
+        if (isDescending(s)) {
+            return new FancyResult(true, "Descending Sequential Digits (" + s + ")");
+        }
+
+        // 9. Special Culturally Significant or Popular Numbers
+        // e.g. 786, 007, 8055 (BOSS), 1008
+        if (val == 786) {
+            return new FancyResult(true, "Special Cultural Number 786");
+        }
+        if (val == 7) {
+            return new FancyResult(true, "Special James Bond Number 0007");
+        }
+        if (s.equals("8055")) {
+            return new FancyResult(true, "Special Number 8055 (BOSS)");
+        }
+        if (val == 1008) {
+            return new FancyResult(true, "Special Auspicious Number 1008");
+        }
+        if (val == 911) {
+            return new FancyResult(true, "Special Emergency Number 911");
+        }
+
+        return new FancyResult(false, "Normal Number");
+    }
+
+    private static boolean isAscending(String s) {
+        // e.g. 1234, 5678, 0123
+        // Check for normal sequence +1
+        boolean normalSeq = true;
+        for (int i = 0; i < s.length() - 1; i++) {
+            if (s.charAt(i + 1) != s.charAt(i) + 1) {
+                normalSeq = false;
+                break;
+            }
+        }
+        if (normalSeq) return true;
+
+        // Custom check for wrap around sequences or specific ones like 7890
+        return s.equals("7890") || s.equals("8901") || s.equals("9012");
+    }
+
+    private static boolean isDescending(String s) {
+        // e.g. 4321, 9876, 5432
+        boolean normalSeq = true;
+        for (int i = 0; i < s.length() - 1; i++) {
+            if (s.charAt(i + 1) != s.charAt(i) - 1) {
+                normalSeq = false;
+                break;
+            }
+        }
+        if (normalSeq) return true;
+
+        return s.equals("0987") || s.equals("1098") || s.equals("2109");
+    }
+
+    /**
+     * Simple container class for returning fancy results.
+     */
+    public static class FancyResult {
+        public final boolean isFancy;
+        public final String reason;
+
+        public FancyResult(boolean isFancy, String reason) {
+            this.isFancy = isFancy;
+            this.reason = reason;
+        }
+    }
+
+    private static void runTests() {
+        System.out.println("Running verification tests...");
+        String[][] testCases = {
+            {"0001", "YES"},
+            {"0009", "YES"},
+            {"0010", "YES"},
+            {"0099", "YES"},
+            {"1111", "YES"},
+            {"9999", "YES"},
+            {"1000", "YES"},
+            {"9000", "YES"},
+            {"0100", "YES"},
+            {"2300", "YES"},
+            {"1221", "YES"},
+            {"9009", "YES"},
+            {"1212", "YES"},
+            {"5050", "YES"},
+            {"1122", "YES"},
+            {"0055", "YES"},
+            {"1234", "YES"},
+            {"5678", "YES"},
+            {"4321", "YES"},
+            {"0786", "YES"},
+            {"0007", "YES"},
+            {"8055", "YES"},
+            {"1008", "YES"},
+            {"0911", "YES"},
+            {"1583", "NO"},
+            {"4829", "NO"},
+            {"9274", "NO"}
+        };
+
+        int passed = 0;
+        for (String[] tc : testCases) {
+            String input = tc[0];
+            String expected = tc[1];
+            FancyResult result = checkFancy(input);
+            String actual = result.isFancy ? "YES" : "NO";
+            if (actual.equals(expected)) {
+                System.out.println("PASS: Input=" + input + " Expected=" + expected + " (" + result.reason + ")");
+                passed++;
+            } else {
+                System.err.println("FAIL: Input=" + input + " Expected=" + expected + " Actual=" + actual + " Reason=" + result.reason);
+            }
+        }
+        System.out.println("Tests completed: " + passed + "/" + testCases.length + " passed.");
+    }
+}
