@@ -1,0 +1,244 @@
+# 🏗️ BuildEstimator — Program Explanation (Tanglish)
+
+> **BuildEstimator** = Building Construction Cost Calculate panna oru smart website.
+> Namma 3 files use panni ithai build pannirukkom: `index.html`, `style.css`, `app.js`
+
+---
+
+## 📦 Overall Structure — 3 Files, 3 Roles
+
+| File | Role | Analogy |
+|------|------|---------|
+| `index.html` | Website-oda skeleton / structure | 🦴 Skeleton |
+| `style.css` | Website-oda design / colors / fonts | 👕 Dress |
+| `app.js` | Calculations, logic, interactions | 🧠 Brain |
+
+---
+
+## 📄 File 1: `index.html` — Skeleton (Structure)
+
+> HTML = Website-la **yenna irukku, yenga irukku** nu decide panra file.
+
+### Header Section
+```
+Logo Icon + "BuildEstimator" title + Dark/Light mode button (top-right corner)
+```
+
+### Left Side — Input Form (User Data Kudukura Part)
+
+| Input Field | Enna? | Default Value |
+|-------------|-------|---------------|
+| Length | Land-oda length (feet) | 50 ft |
+| Breadth | Land-oda width (feet) | 30 ft |
+| Open Space Slider | Garden / setback % | 10% |
+| Floor Buttons | G Only / G+1 / G+2 / G+3 | G+2 (3 floors) |
+| GF Base Rate | Ground Floor rate per sq ft | ₹3,000 |
+
+### Right Side — Results (Kaatru Part)
+
+| Section | Enna Kaatrum? |
+|---------|--------------|
+| 💰 Big Price Card | Total Estimated Cost (large bold display) |
+| 📊 4 Metric Cards | Land Area, Open Space, Per-Floor Area, Total Built Area |
+| 📋 Floor-wise Table | Each floor-oda rate & cost breakdown |
+| 🗺️ SVG Visualizer | Built area vs Open space — visual diagram |
+| 🖨️ PDF Button | Print / Download as PDF |
+
+---
+
+## 🎨 File 2: `style.css` — Dress (Design)
+
+> CSS = Website-oda **look and feel** — colors, fonts, shadows, animations ellam itha control pannum.
+
+### Theme System
+
+```css
+Dark Mode  → Background: #0b0f19 (almost black), Text: white
+Light Mode → Background: #f1f5f9 (light grey), Text: dark
+```
+
+**Theme toggle button** click pannum pothu dark ↔ light switch aagum.
+Browser close pannalum **remember pannum** (localStorage use pannum).
+
+### Key Design Parts
+
+| CSS Class | Enna Pannum? |
+|-----------|-------------|
+| `.price-hero-card` | Total cost kaatara big purple gradient card |
+| `.metrics-grid` | 4 small info cards — 2x2 grid layout |
+| `.floor-breakdown-table` | Floor-wise table — gradient purple header |
+| `.floor-name-badge` | Floor name — each floor different color |
+| `.svg-build-rect` | Blue rect — built area in visualizer |
+| `.svg-open-rect` | Green rect — open space in visualizer |
+| `@media print` | PDF button press panna clean black & white print layout |
+
+### Floor Badge Colors
+
+| Floor | Color |
+|-------|-------|
+| Ground Floor (GF) | 🔵 Blue (Indigo) |
+| First Floor (FF) | 🟢 Green |
+| Second Floor (SF) | 🟡 Amber/Yellow |
+| Third Floor (TF) | 🩷 Pink |
+| Fourth Floor+ | 🩵 Cyan |
+
+---
+
+## ⚙️ File 3: `app.js` — Brain (Logic)
+
+> JavaScript = Website-oda **brain** — user input kedaikkum pothu calculate pannum, screen update pannum.
+
+### 🧮 Step-by-Step Calculation
+
+```
+📥 User Inputs:
+   Length     = 50 ft
+   Breadth    = 30 ft
+   Open Space = 10%
+   Floors     = 3  (Ground + 2)
+   GF Rate    = ₹3,000 per sq ft
+
+─────────────────────────────────────────────
+📐 Step 1: Land Area
+   Land Area = Length × Breadth
+             = 50 × 30
+             = 1,500 sq ft
+
+─────────────────────────────────────────────
+🌳 Step 2: Open Space & Build Area
+   Open Space     = 1,500 × 10%  = 150 sq ft
+   Build Area/Floor = 1,500 - 150 = 1,350 sq ft
+
+─────────────────────────────────────────────
+💰 Step 3: Per-Floor Rate (Each floor +1% over previous)
+   GF Rate = ₹3,000         (Base Rate — user input)
+   FF Rate = 3,000 × 1.01  = ₹3,030.00
+   SF Rate = 3,030 × 1.01  = ₹3,060.30
+
+─────────────────────────────────────────────
+🏗️ Step 4: Per-Floor Cost
+   GF Cost = 1,350 × ₹3,000.00  = ₹40,50,000
+   FF Cost = 1,350 × ₹3,030.00  = ₹40,90,500
+   SF Cost = 1,350 × ₹3,060.30  = ₹41,31,405
+
+─────────────────────────────────────────────
+🧾 Step 5: Grand Total
+   TOTAL = ₹40,50,000 + ₹40,90,500 + ₹41,31,405
+         = ₹1,22,71,905
+```
+
+### 🔄 Real-time Update
+
+User oru input maathina udane — **page reload venam**, automatic-a recalculate aagum.
+
+```
+User types → input event fires → calculateCost() runs → Screen updates instantly
+```
+
+### 💬 Amount to Words Conversion
+
+JavaScript function amount-a Indian words-la convert pannum:
+
+```
+₹1,22,71,905 
+→ "One Crore Twenty Two Lakh Seventy One Thousand 
+   Nine Hundred Five Rupees Only"
+```
+
+**Logic:**
+- Crores → Lakhs → Thousands → Hundreds → remaining
+- Oru-oru part-a words-la convert pannum
+
+### 🗺️ SVG Visualizer — Auto Update
+
+Open Space % change panna pothu, SVG diagram auto-update aagum:
+
+```
+Open Space = 10%  → Blue rect 90% width, Green rect 10% width
+Open Space = 30%  → Blue rect 70% width, Green rect 30% width
+Open Space = 50%  → Blue rect 50% width, Green rect 50% width
+```
+
+### 🖨️ PDF Download / Print
+
+Print button click pannum pothu:
+1. Hidden print template visible aagum
+2. Browser-oda print dialog open aagum
+3. "Save as PDF" select pannalaam
+4. Clean black & white estimate sheet download aagum
+
+---
+
+## 🔁 Overall Program Flow
+
+```
+┌─────────────────────────────────────────────────────┐
+│                   User Opens Website                │
+│              (index.html loads first)               │
+└──────────────────────┬──────────────────────────────┘
+                       │
+                       ▼
+┌─────────────────────────────────────────────────────┐
+│         style.css applies Design & Colors           │
+│         (Dark theme loads by default)               │
+└──────────────────────┬──────────────────────────────┘
+                       │
+                       ▼
+┌─────────────────────────────────────────────────────┐
+│         app.js runs Initial Calculation             │
+│         (Default values use pannum: 50×30, 3 floors)│
+└──────────────────────┬──────────────────────────────┘
+                       │
+                       ▼
+┌─────────────────────────────────────────────────────┐
+│              Results Display on Screen              │
+│   ┌─────────────┐  ┌────────────────────────────┐  │
+│   │  Input Form │  │   Total Cost: ₹1,22,71,905 │  │
+│   │  (Left Side)│  │   Floor Table + SVG diagram │  │
+│   └─────────────┘  └────────────────────────────┘  │
+└──────────────────────┬──────────────────────────────┘
+                       │
+                       ▼
+┌─────────────────────────────────────────────────────┐
+│         User Changes Any Input                      │
+│         → Auto Recalculate → Screen Updates         │
+└──────────────────────┬──────────────────────────────┘
+                       │
+                       ▼
+┌─────────────────────────────────────────────────────┐
+│         Optional: Click "Download PDF Estimate"     │
+│         → Print Dialog → Save as PDF                │
+└─────────────────────────────────────────────────────┘
+```
+
+---
+
+## 📁 File Locations
+
+All 3 files ungaloda computer-la save aayiruchu:
+
+```
+C:\Users\shere\OneDrive\Pictures\Screenshots\java\
+├── index.html   ← Website structure
+├── style.css    ← Design & Colors
+└── app.js       ← Calculation Logic
+```
+
+> OneDrive-la irukku, so **cloud backup** automatic-a aagum! ☁️
+
+---
+
+## 🎯 Summary — Simple-a Sollanam-na
+
+> **HTML** = Yenna irukku, yenga irukku — 🦴 Skeleton
+>
+> **CSS** = Epdi teriyadhu — 👕 Dress
+>
+> **JavaScript** = Epdi work pannum — 🧠 Brain
+>
+> Moonum serndhu → **BuildEstimator** complete website! 🏗️✅
+
+---
+
+*Document prepared for: BuildEstimator — Construction Cost Calculator*
+*Version: 1.0 | Date: July 2026*
